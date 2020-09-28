@@ -1,19 +1,24 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { Button, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Button, DatePickerAndroid, StyleSheet, Text, View } from 'react-native';
 import {vibrate} from './utils'
+import  Constants  from "expo-constants";
+import Cronometro from "./components/Cronometro"
 
+
+let secsInterval = null;
+let minsInterval = null;
 export default function App() {
+
   return (
     <View style={styles.container}>
-      <Text>Click para hacer vibrar el dispositivo!</Text>
-      <Button 
-        title="Vibracion"
-        onPress={vibrate}
-      />
-      <StatusBar style="auto" />
+      
+      <Text>Cronometro Pomodoro</Text>
+      <Cronometro />
+
     </View>
   );
+
 }
 
 const styles = StyleSheet.create({
