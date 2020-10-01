@@ -29,11 +29,7 @@ class CronometroPomodoro extends React.Component{
         if(prevState.estado !== this.state.estado){
             this.setTiempoActivo();
         }
-        this.onComplete()
-    }
-
-    onComplete = () => {
-        if(this.state.tiempo == 0){
+        if(this.state.activo == true && this.state.tiempo == 0){
             clearInterval(this.contadorId)
             Vibration.vibrate()
             this.setEstado()
@@ -69,13 +65,13 @@ class CronometroPomodoro extends React.Component{
 		if(this.state.estado === "Trabajo")
 		{
             this.setState({
-                tiempo: this.state.tiempoTrabajo
+                tiempo: this.state.tiempoTrabajo*60
             })
 		}
 		else
 		{
 			this.setState({
-                tiempo: this.state.tiempoDescanso
+                tiempo: this.state.tiempoDescanso*60
             })
         }
     }
@@ -83,11 +79,11 @@ class CronometroPomodoro extends React.Component{
     getTiempoActivo = () => {
         if(this.state.estado === "Trabajo")
         {
-            return this.state.tiempoTrabajo
+            return this.state.tiempoTrabajo*60
         }
         else
         {
-            return this.state.tiempoDescanso
+            return this.state.tiempoDescanso*60
         }
     }
     
@@ -139,7 +135,8 @@ class CronometroPomodoro extends React.Component{
                 </View>
                 <View>
                     <Text> 
-                        {this.state.tiempo}
+                    {Math.floor(this.state.tiempo/60).toString().padStart(2,"0") + ":" + 
+					(this.state.tiempo % 60).toString().padStart(2,"0")}
                     </Text>
                 <Button title={"Play"} onPress={this.contar}/>
                 <Button title={"Pause"} onPress={this.pausar}/>
