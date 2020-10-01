@@ -3,18 +3,17 @@ import React, { useEffect, useState } from 'react';
 import { Button, DatePickerAndroid, StyleSheet, Text, View } from 'react-native';
 import {vibrate} from './utils'
 import  Constants  from "expo-constants";
-import Cronometro from "./components/Cronometro"
+import Cronometro from "./components/CronometroPomodoro"
+import CronometroPomodoro from './components/CronometroPomodoro';
 
 
-let secsInterval = null;
-let minsInterval = null;
 export default function App() {
 
   return (
     <View style={styles.container}>
       
       <Text>Cronometro Pomodoro</Text>
-      <Cronometro />
+      <CronometroPomodoro />
 
     </View>
   );
