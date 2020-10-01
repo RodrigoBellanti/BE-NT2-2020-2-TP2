@@ -1,6 +1,5 @@
 import React,{useEffect} from 'react'
-import {View,Text,TextInput,Button} from 'react-native'
-import Contador from './Contador'
+import {View,Text,TextInput,Button,Vibration} from 'react-native'
 
 class CronometroPomodoro extends React.Component{
     constructor(props){
@@ -9,6 +8,37 @@ class CronometroPomodoro extends React.Component{
             estado: "Trabajo",
             tiempoTrabajo: 25,
             tiempoDescanso: 5,
+            activo: false,
+            pausado: false,
+            tiempo: null
+        }
+    }
+
+    
+    componentDidMount(){
+        this.setTiempoActivo()
+    }
+
+    componentDidUpdate(prevProps, prevState){
+        if(prevState.tiempoTrabajo !== this.state.tiempoTrabajo){
+            this.setTiempoActivo();
+        }
+        if(prevState.tiempoDescanso !== this.state.tiempoDescanso){
+            this.setTiempoActivo();
+        }
+        if(prevState.estado !== this.state.estado){
+            this.setTiempoActivo();
+        }
+        this.onComplete()
+    }
+
+    onComplete = () => {
+        if(this.state.tiempo == 0){
+            clearInterval(this.contadorId)
+            Vibration.vibrate()
+            this.setEstado()
+            this.setTiempoActivo()
+            this.contar()
         }
     }
 
@@ -35,22 +65,65 @@ class CronometroPomodoro extends React.Component{
         }
     }
 
-    tiempoActivo = () => {   
+    setTiempoActivo = () => {   
 		if(this.state.estado === "Trabajo")
 		{
-            return this.state.tiempoTrabajo
+            this.setState({
+                tiempo: this.state.tiempoTrabajo
+            })
 		}
 		else
 		{
-			return this.state.tiempoDescanso
+			this.setState({
+                tiempo: this.state.tiempoDescanso
+            })
+        }
+    }
+
+    getTiempoActivo = () => {
+        if(this.state.estado === "Trabajo")
+        {
+            return this.state.tiempoTrabajo
+        }
+        else
+        {
+            return this.state.tiempoDescanso
         }
     }
     
+    contar = () => {
+        this.setState({
+            activo: true
+        })
+        this.contadorId = setInterval(() => {
+            this.setState({
+                tiempo: this.state.tiempo - 1
+            })
+            console.log(this.state.tiempo)
+        }, 1000);
+    }
 
+    pausar = () => {
+        clearInterval(this.contadorId)
+        this.setState({
+            activo: false,
+            pausado: true
+        })
+    }
+
+    reset = () => {
+        clearInterval(this.contadorId)
+        this.setState({
+            activo: false,
+            pausado: false,
+            tiempo: this.getTiempoActivo()
+        })
+    }
+
+    
     
 
     render(){
-        let tiempo = this.tiempoActivo()
         return(
             <View>
                 <View>
@@ -64,11 +137,14 @@ class CronometroPomodoro extends React.Component{
                 <View>
                     <Button title={"Cambiar estado"} onPress={this.setEstado}/>
                 </View>
-                <Contador 
-                    tiempo={tiempo}
-                    estado={this.state.estado}
-                    Oncomplete={this.setEstado}
-                />
+                <View>
+                    <Text> 
+                        {this.state.tiempo}
+                    </Text>
+                <Button title={"Play"} onPress={this.contar}/>
+                <Button title={"Pause"} onPress={this.pausar}/>
+                <Button title={"Reset"} onPress={this.reset}/>
+            </View>
             </View>
           
             
