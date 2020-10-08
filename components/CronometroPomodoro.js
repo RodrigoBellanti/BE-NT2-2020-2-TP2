@@ -1,5 +1,5 @@
 import React,{useEffect} from 'react'
-import {View,Text,TextInput,Button,Vibration} from 'react-native'
+import {View,Text,TextInput,Button,Vibration, StyleSheet} from 'react-native'
 
 class CronometroPomodoro extends React.Component{
     constructor(props){
@@ -39,11 +39,22 @@ class CronometroPomodoro extends React.Component{
     }
 
     setTiempoTrabajo = event => {
-        this.setState({ tiempoTrabajo: event.target.value })
+        if(event.target.value>0){
+            this.setState({ tiempoTrabajo: event.target.value })
+           }
+           else {
+               alert('Numero invalido')
+           }
     }
     
    setTiempoDescanso = event => {
+       if(event.target.value>0){
         this.setState({ tiempoDescanso: event.target.value })
+       }
+       else {
+           alert('Numero invalido')
+       }
+        
     }   
     
 
@@ -122,26 +133,23 @@ class CronometroPomodoro extends React.Component{
     render(){
         return(
             <View>
-                <View>
+                <View >
                     <Text>Tiempo de trabajo: {this.state.tiempoTrabajo}</Text>
                     <TextInput  keyboardType={"numeric"} onChange={this.setTiempoTrabajo}/>
-				</View>
-                <View>
                     <Text>Tiempo de descanso: {this.state.tiempoDescanso}</Text>
                     <TextInput  keyboardType={"numeric"} onChange={this.setTiempoDescanso}/>
-				</View>
-                <View>
-                    <Button title={"Cambiar estado"} onPress={this.setEstado}/>
                 </View>
                 <View>
-                    <Text> 
+                    <Text > 
                     {Math.floor(this.state.tiempo/60).toString().padStart(2,"0") + ":" + 
-					(this.state.tiempo % 60).toString().padStart(2,"0")}
+                    (this.state.tiempo % 60).toString().padStart(2,"0")}
                     </Text>
-                <Button title={"Play"} onPress={this.contar}/>
-                <Button title={"Pause"} onPress={this.pausar}/>
-                <Button title={"Reset"} onPress={this.reset}/>
-            </View>
+                </View>
+                <View>
+                    <Button title={"Play"} onPress={this.contar} color='black'/>
+                    <Button title={"Pause"} onPress={this.pausar} color='black' />
+                    <Button title={"Reset"} onPress={this.reset}  color='black'/>
+                </View>
             </View>
           
             
@@ -150,3 +158,8 @@ class CronometroPomodoro extends React.Component{
 
 }
 export default CronometroPomodoro;
+
+const styles = StyleSheet.create({
+
+
+})
