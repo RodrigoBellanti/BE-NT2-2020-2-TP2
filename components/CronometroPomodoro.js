@@ -1,163 +1,135 @@
-import React,{useEffect} from 'react'
+import React,{useEffect, useState} from 'react'
 import {View,Text,TextInput,Button,Vibration, StyleSheet} from 'react-native'
 
-class CronometroPomodoro extends React.Component{
-    constructor(props){
-        super(props);
-        this.state = {
-            estado: "Trabajo",
-            tiempoTrabajo: 25,
-            tiempoDescanso: 5,
-            activo: false,
-            pausado: false,
-            tiempo: null
-        }
-    }
+let contadorId = null
 
+export default function CronometroPomodoro() {
+    const [estado, setEstado] = useState("Trabajo")
+    const [tiempoTrabajo, setTiempoTrabajo] = useState(25)
+    const [tiempoDescanso, setTiempoDescanso] = useState(5)
+    const [activo, setActivo] = useState(false)
+    const [tiempo, setTiempo] = useState(getTiempoActivo)
+    const [pausa, setPausa] = useState(true)
+
+     
+    useEffect(() => {
+         handleTiempo()
+    },[estado])
+
+    useEffect(() => {
+        handleTiempo()
+    },[tiempoDescanso,tiempoTrabajo])
     
-    componentDidMount(){
-        this.setTiempoActivo()
-    }
 
-    componentDidUpdate(prevProps, prevState){
-        if(prevState.tiempoTrabajo !== this.state.tiempoTrabajo){
-            this.setTiempoActivo();
-        }
-        if(prevState.tiempoDescanso !== this.state.tiempoDescanso){
-            this.setTiempoActivo();
-        }
-        if(prevState.estado !== this.state.estado){
-            this.setTiempoActivo();
-        }
-        if(this.state.activo == true && this.state.tiempo == 0){
-            clearInterval(this.contadorId)
+    useEffect(() => {
+        if(!pausa && tiempo == 0){
+            clearInterval(contadorId)
             Vibration.vibrate()
-            this.setEstado()
-            this.setTiempoActivo()
-            this.contar()
+            handleEstado()
+            setActivo(!activo)
+            console.log("Vibrate")
         }
-    }
+    },[tiempo])
 
-    setTiempoTrabajo = event => {
-        if(event.target.value>0){
-            this.setState({ tiempoTrabajo: event.target.value })
-           }
-           else {
-               alert('Numero invalido')
-           }
-    }
-    
-   setTiempoDescanso = event => {
-       if(event.target.value>0){
-        this.setState({ tiempoDescanso: event.target.value })
-       }
-       else {
-           alert('Numero invalido')
-       }
-        
-    }   
-    
+    useEffect(() => {
+            contadorId = setInterval(() => {
+                setTiempo(tiempo => tiempo - 1)
+            }, 1000);
+    },[activo])
 
-    setEstado = () =>{
-        if(this.state.estado === "Trabajo")
-        {
-            this.setState({
-                estado: "Descanso"
-            })
-        }else
-        {
-            this.setState({
-                estado: "Trabajo"
-            })
+  
+    useEffect(() => {
+        if(pausa){
+            clearInterval(contadorId)
         }
+    },[])
+
+
+    let handleTiempoTrabajo = (value) => {
+        setTiempoTrabajo(Math.floor(value))
+        console.log(tiempoTrabajo)
     }
 
-    setTiempoActivo = () => {   
-		if(this.state.estado === "Trabajo")
-		{
-            this.setState({
-                tiempo: this.state.tiempoTrabajo*60
-            })
-		}
-		else
-		{
-			this.setState({
-                tiempo: this.state.tiempoDescanso*60
-            })
-        }
+    let handleTiempoDescanso = (value) => {
+        setTiempoDescanso(Math.floor(value))
+        console.log(tiempoDescanso)
     }
 
-    getTiempoActivo = () => {
-        if(this.state.estado === "Trabajo")
-        {
-            return this.state.tiempoTrabajo*60
+
+    let handleEstado = () => {
+        console.log("cambio el estado")
+        if(estado === "Trabajo"){
+            setEstado("Descanso")
         }
         else
         {
-            return this.state.tiempoDescanso*60
+            setEstado("Trabajo")
+        }
+        console.log(estado)
+    }
+
+    let handleTiempo = () => {
+        setTiempo(getTiempoActivo())
+    }
+
+    
+    let getTiempoActivo = () => {
+        if(estado === "Trabajo")
+        {
+            return tiempoTrabajo*60
+        }
+        else
+        {
+            return tiempoDescanso*60
         }
     }
     
-    contar = () => {
-        this.setState({
-            activo: true
-        })
-        this.contadorId = setInterval(() => {
-            this.setState({
-                tiempo: this.state.tiempo - 1
-            })
-            console.log(this.state.tiempo)
-        }, 1000);
+    
+    let iniciarContador = () => {
+        setPausa(false)
+        setActivo(!activo)
     }
 
-    pausar = () => {
-        clearInterval(this.contadorId)
-        this.setState({
-            activo: false,
-            pausado: true
-        })
+    let pausar = () => {
+        clearInterval(contadorId)
+        setPausa(true)
     }
 
-    reset = () => {
-        clearInterval(this.contadorId)
-        this.setState({
-            activo: false,
-            pausado: false,
-            tiempo: this.getTiempoActivo()
-        })
+    let reset = () => {
+        clearInterval(contadorId)
+        setPausa(true)
+        handleTiempo()
     }
 
     
     
-
-    render(){
-        return(
-            <View>
-                <View >
-                    <Text>Tiempo de trabajo: {this.state.tiempoTrabajo}</Text>
-                    <TextInput  keyboardType={"numeric"} onChange={this.setTiempoTrabajo}/>
-                    <Text>Tiempo de descanso: {this.state.tiempoDescanso}</Text>
-                    <TextInput  keyboardType={"numeric"} onChange={this.setTiempoDescanso}/>
-                </View>
-                <View>
-                    <Text > 
-                    {Math.floor(this.state.tiempo/60).toString().padStart(2,"0") + ":" + 
-                    (this.state.tiempo % 60).toString().padStart(2,"0")}
-                    </Text>
-                </View>
-                <View>
-                    <Button title={"Play"} onPress={this.contar} color='black'/>
-                    <Button title={"Pause"} onPress={this.pausar} color='black' />
-                    <Button title={"Reset"} onPress={this.reset}  color='black'/>
-                </View>
+    return(
+        <View>
+            <View >
+                <Text>Tiempo de trabajo: {tiempoTrabajo}</Text>
+                <TextInput  keyboardType={"numeric"} onChangeText={value => handleTiempoTrabajo(value)}/>
+                <Text>Tiempo de descanso: {tiempoDescanso}</Text>
+                <TextInput  keyboardType={"numeric"} onChangeText={value => handleTiempoDescanso(value)}/>
             </View>
+            <View>
+                <Text > 
+                {Math.floor(tiempo/60).toString().padStart(2,"0") + ":" + 
+                (tiempo % 60).toString().padStart(2,"0")}
+                </Text>
+            </View>
+            <View>
+                <Button title={"Cambiar Estado"} onPress={handleEstado} color='black'/>
+                <Button title={"Play"} onPress={iniciarContador} color='black'/>
+                <Button title={"Pause"} onPress={pausar} color='black' />
+                <Button title={"Reset"} onPress={reset}  color='black'/>
+            </View>
+        </View>
           
             
-        )
-    }
-
+    )
 }
-export default CronometroPomodoro;
+
+
 
 const styles = StyleSheet.create({
 
